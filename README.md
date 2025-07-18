@@ -45,7 +45,15 @@ python draftable_cleanup.py --batch-size 20 --no-confirm --api-key YOUR_DRAFTABL
 
 ### Example: Interactive Deletion
 ```bash
-python draftable_cleanup.py --batch-size 5
+Fetching batch 1...
+Count: 84868
+Found 10 comparisons in this batch.
+Comparisons:
+Identifier: OVmCpFNH | Created: 2025-07-18T15:49:43.415564Z
+Identifier: OmmbzCDC | Created: 2025-07-18T13:33:35.322469Z
+Auto-confirm enabled: deleting this batch without prompt.
+Deleted comparison OVmCpFNH
+Deleted comparison NTlCzADK
 ```
 
 ## Notes

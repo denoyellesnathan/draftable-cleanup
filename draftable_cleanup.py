@@ -103,12 +103,18 @@ def main():
         type=str,
         help="Delete a specific comparison by its identifier",
     )
+    parser.add_argument(
+        "--list-only",
+        action="store_true",
+        help="List comparisons only, do not delete anything",
+    )
     args = parser.parse_args()
     batch_size = args.batch_size
     no_confirm = args.no_confirm
     api_key = args.api_key if args.api_key is not None else API_KEY
     rate_limit = args.rate_limit
     delete_id = args.delete_id
+    list_only = args.list_only
     
     # Update global rate limiter with user-specified rate limit
     global rate_limiter
@@ -135,7 +141,7 @@ def main():
         return
 
     url = f"{API_URL}?limit={batch_size}"
-    total_deleted = 0
+    total_listed = 0
     batch_num = 1
     print(f"\nFetching batch {batch_num}...")
     comparisons, count = fetch_comparisons_batch(url)
@@ -143,7 +149,7 @@ def main():
     while url and count > 0:
         print("Count:", count)
         if not comparisons:
-            print("No more comparisons to delete.")
+            print("No more comparisons to list.")
             break
         print(f"Found {len(comparisons)} comparisons in this batch.")
         print("Comparisons:")
@@ -151,6 +157,14 @@ def main():
             identifier = comp.get("identifier", "N/A")
             created = comp.get("creation_time", "N/A")
             print(f"Identifier: {identifier} | Created: {created}")
+            total_listed += 1
+        
+        if list_only:
+            print(f"Listed {len(comparisons)} comparisons in this batch.")
+            batch_num += 1
+            comparisons, count = fetch_comparisons_batch(url)
+            continue
+            
         if not no_confirm:
             confirm = (
                 input(
@@ -168,12 +182,15 @@ def main():
             identifier = comp.get("identifier")
             if identifier:
                 delete_comparison(identifier)
-                total_deleted += 1
             else:
                 print(f"No identifier found in: {comp}")
         batch_num += 1
         comparisons, count = fetch_comparisons_batch(url)
-    print(f"\nDone. Total comparisons deleted: {total_deleted}")
+    
+    if list_only:
+        print(f"\nDone. Total comparisons listed: {total_listed}")
+    else:
+        print(f"\nDone. Total comparisons deleted: {total_listed}")
 
 
 if __name__ == "__main__":

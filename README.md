@@ -41,6 +41,7 @@ python draftable_cleanup.py
 - `--api-key KEY`  : Specify the Draftable API key to use (overrides the value in the script)
 - `--rate-limit N` : Maximum requests per minute (default: 400)
 - `--delete-id ID` : Delete a specific comparison by its identifier
+- `--list-only`    : List comparisons only, do not delete anything
 
 ### Rate Limiting
 The script includes a built-in rate limiter that prevents exceeding API rate limits:
@@ -48,6 +49,15 @@ The script includes a built-in rate limiter that prevents exceeding API rate lim
 - **Configurable**: Use `--rate-limit` to set custom limits
 - **Automatic**: The script will automatically wait when the rate limit is reached
 - **Sliding window**: Uses a 1-minute sliding window for accurate rate limiting
+
+### Example: List All Comparisons Without Deleting
+```bash
+# List all comparisons with default batch size
+python draftable_cleanup.py --list-only --api-key YOUR_DRAFTABLE_API_KEY
+
+# List with larger batch size for faster listing
+python draftable_cleanup.py --list-only --batch-size 50 --api-key YOUR_DRAFTABLE_API_KEY
+```
 
 ### Example: Delete All Comparisons Without Prompt
 ```bash

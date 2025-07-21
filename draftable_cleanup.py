@@ -1,5 +1,8 @@
 import requests
 import argparse
+import time
+from collections import deque
+from datetime import datetime, timedelta
 
 # Replace 'YOUR_DRAFTABLE_API_KEY' with your actual Draftable API key
 API_KEY = "YOUR_DRAFTABLE_API_KEY"
@@ -10,8 +13,41 @@ HEADERS = {
 }
 
 
+class RateLimiter:
+    """Rate limiter that tracks requests within a sliding window."""
+
+    def __init__(self, max_requests_per_minute):
+        self.max_requests = max_requests_per_minute
+        self.requests = deque()
+
+    def wait_if_needed(self):
+        """Wait if necessary to respect the rate limit."""
+        now = datetime.now()
+
+        # Remove requests older than 1 minute
+        while self.requests and (now - self.requests[0]) > timedelta(minutes=1):
+            self.requests.popleft()
+
+        # If we've hit the rate limit, wait until the oldest request expires
+        if len(self.requests) >= self.max_requests:
+            sleep_time = (self.requests[0] + timedelta(minutes=1) - now).total_seconds()
+            if sleep_time > 0:
+                print(f"Rate limit reached. Waiting {sleep_time:.2f} seconds...")
+                time.sleep(sleep_time)
+                # Recursive call to check again after waiting
+                return self.wait_if_needed()
+
+        # Add current request timestamp
+        self.requests.append(now)
+
+
+# Global rate limiter instance
+rate_limiter = RateLimiter(400)  # Default: 400 requests per minute
+
+
 def fetch_comparisons_batch(url):
     """Fetch a single batch of comparisons from the given URL."""
+    rate_limiter.wait_if_needed()
     response = requests.get(url, headers=HEADERS)
     if response.status_code != 200:
         print(f"Failed to list comparisons: {response.status_code} {response.text}")
@@ -27,6 +63,7 @@ def fetch_comparisons_batch(url):
 
 def delete_comparison(identifier):
     """Delete a comparison by its identifier."""
+    rate_limiter.wait_if_needed()
     del_url = f"{API_URL}/{identifier}"
     response = requests.delete(del_url, headers=HEADERS)
     if response.status_code == 204:
@@ -55,16 +92,29 @@ def main():
         type=str,
         help="API key to be used for Draftable API requests.",
     )
+    parser.add_argument(
+        "--rate-limit",
+        type=int,
+        default=300,
+        help="Maximum requests per minute (default: 300)",
+    )
     args = parser.parse_args()
     batch_size = args.batch_size
     no_confirm = args.no_confirm
     api_key = args.api_key if args.api_key is not None else API_KEY
+    rate_limit = args.rate_limit
+
+    # Update global rate limiter with user-specified rate limit
+    global rate_limiter
+    rate_limiter = RateLimiter(rate_limit)
+
     global HEADERS
     HEADERS = {
         "Authorization": f"Token {api_key}",
         "Content-Type": "application/json",
     }
 
+    print(f"Rate limit set to {rate_limit} requests per minute")
     url = f"{API_URL}?limit={batch_size}"
     total_deleted = 0
     batch_num = 1

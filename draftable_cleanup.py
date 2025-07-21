@@ -115,11 +115,11 @@ def main():
     rate_limit = args.rate_limit
     delete_id = args.delete_id
     list_only = args.list_only
-    
+
     # Update global rate limiter with user-specified rate limit
     global rate_limiter
     rate_limiter = RateLimiter(rate_limit)
-    
+
     global HEADERS
     HEADERS = {
         "Authorization": f"Token {api_key}",
@@ -127,12 +127,18 @@ def main():
     }
 
     print(f"Rate limit set to {rate_limit} requests per minute")
-    
+
     # Handle single comparison deletion
     if delete_id:
         print(f"Deleting specific comparison: {delete_id}")
         if not no_confirm:
-            confirm = input(f"Are you sure you want to delete comparison {delete_id}? (Y/N): ").strip().lower()
+            confirm = (
+                input(
+                    f"Are you sure you want to delete comparison {delete_id}? (Y/N): "
+                )
+                .strip()
+                .lower()
+            )
             if confirm != "y":
                 print("Deletion cancelled. Exiting.")
                 return
@@ -158,13 +164,13 @@ def main():
             created = comp.get("creation_time", "N/A")
             print(f"Identifier: {identifier} | Created: {created}")
             total_listed += 1
-        
+
         if list_only:
             print(f"Listed {len(comparisons)} comparisons in this batch.")
             batch_num += 1
             comparisons, count = fetch_comparisons_batch(url)
-            continue
-            
+            break
+
         if not no_confirm:
             confirm = (
                 input(
@@ -186,7 +192,7 @@ def main():
                 print(f"No identifier found in: {comp}")
         batch_num += 1
         comparisons, count = fetch_comparisons_batch(url)
-    
+
     if list_only:
         print(f"\nDone. Total comparisons listed: {total_listed}")
     else:

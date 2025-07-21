@@ -95,19 +95,25 @@ def main():
     parser.add_argument(
         "--rate-limit",
         type=int,
-        default=300,
-        help="Maximum requests per minute (default: 300)",
+        default=400,
+        help="Maximum requests per minute (default: 400)",
+    )
+    parser.add_argument(
+        "--delete-id",
+        type=str,
+        help="Delete a specific comparison by its identifier",
     )
     args = parser.parse_args()
     batch_size = args.batch_size
     no_confirm = args.no_confirm
     api_key = args.api_key if args.api_key is not None else API_KEY
     rate_limit = args.rate_limit
-
+    delete_id = args.delete_id
+    
     # Update global rate limiter with user-specified rate limit
     global rate_limiter
     rate_limiter = RateLimiter(rate_limit)
-
+    
     global HEADERS
     HEADERS = {
         "Authorization": f"Token {api_key}",
@@ -115,6 +121,19 @@ def main():
     }
 
     print(f"Rate limit set to {rate_limit} requests per minute")
+    
+    # Handle single comparison deletion
+    if delete_id:
+        print(f"Deleting specific comparison: {delete_id}")
+        if not no_confirm:
+            confirm = input(f"Are you sure you want to delete comparison {delete_id}? (Y/N): ").strip().lower()
+            if confirm != "y":
+                print("Deletion cancelled. Exiting.")
+                return
+        delete_comparison(delete_id)
+        print("Single comparison deletion completed.")
+        return
+
     url = f"{API_URL}?limit={batch_size}"
     total_deleted = 0
     batch_num = 1

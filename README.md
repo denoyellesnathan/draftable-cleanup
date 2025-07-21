@@ -3,7 +3,7 @@
 This Python script allows you to list and delete all comparisons from your [Draftable](https://draftable.com/) account using the Draftable API. It supports batch deletion, confirmation prompts, rate limiting, and can be run non-interactively for automation.
 
 ## Features
-- List all Draftable API comparisons in batches
+- List first batch of Draftable API comparisons for exploration.
 - Delete comparisons in batches
 - **Rate limiting** with configurable requests per minute (default: 400)
 - Optional confirmation prompt before deletion

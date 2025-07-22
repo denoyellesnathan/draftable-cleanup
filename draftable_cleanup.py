@@ -146,9 +146,10 @@ def main():
         print("Single comparison deletion completed.")
         return
 
-    url = f"{API_URL}?limit={batch_size}"
     total_listed = 0
     batch_num = 1
+    offset = 0
+    url = f"{API_URL}?limit={batch_size}&offset={offset}"
     print(f"\nFetching batch {batch_num}...")
     comparisons, count = fetch_comparisons_batch(url)
 
@@ -168,8 +169,22 @@ def main():
         if list_only:
             print(f"Listed {len(comparisons)} comparisons in this batch.")
             batch_num += 1
-            comparisons, count = fetch_comparisons_batch(url)
-            break
+            offset += batch_size
+            url = f"{API_URL}?limit={batch_size}&offset={offset}"
+            confirm = (
+                input(
+                    "\nList next batch? (Y/N): "
+                )
+                .strip()
+                .lower()
+            )
+            if confirm != "y":
+                print("Exiting.")
+                break
+            else:
+                print("Listing next batch.")
+                comparisons, count = fetch_comparisons_batch(url)
+                continue
 
         if not no_confirm:
             confirm = (

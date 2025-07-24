@@ -64,6 +64,26 @@ python draftable_cleanup.py --list-only --batch-size 50 --api-key YOUR_DRAFTABLE
 python draftable_cleanup.py --batch-size 20 --no-confirm --api-key YOUR_DRAFTABLE_API_KEY
 ```
 
+Output:
+```
+Rate limit set to 400 requests per minute
+
+Fetching batch 1...
+Count: 84868
+Found 20 comparisons in this batch.
+Comparisons:
+{
+    "identifier": "OVmCpFNH",
+    "created": "2025-07-18T15:49:43.415564Z",
+    "expires": "2025-08-18T15:49:43.415564Z"
+}
+...
+Auto-confirm enabled: deleting this batch without prompt.
+Deleted comparison OVmCpFNH
+Deleted comparison OmmbzCDC
+...
+```
+
 ### Example: Delete a Specific Comparison
 ```bash
 # Delete a single comparison with confirmation
@@ -71,6 +91,15 @@ python draftable_cleanup.py --delete-id ABC123 --api-key YOUR_DRAFTABLE_API_KEY
 
 # Delete a single comparison without confirmation
 python draftable_cleanup.py --delete-id ABC123 --no-confirm --api-key YOUR_DRAFTABLE_API_KEY
+```
+
+Output for single comparison deletion:
+```
+Rate limit set to 400 requests per minute
+Deleting specific comparison: ABC123
+Are you sure you want to delete comparison ABC123? (Y/N): y
+Deleted comparison ABC123
+Single comparison deletion completed.
 ```
 
 ### Example: Custom Rate Limiting
@@ -87,13 +116,26 @@ python draftable_cleanup.py --rate-limit 100 --batch-size 5 --no-confirm
 $ python draftable_cleanup.py --api-key YOUR_DRAFTABLE_API_KEY
 
 Rate limit set to 400 requests per minute
+
 Fetching batch 1...
 Count: 84868
 Found 10 comparisons in this batch.
 Comparisons:
-Identifier: OVmCpFNH | Created: 2025-07-18T15:49:43.415564Z
-Identifier: OmmbzCDC | Created: 2025-07-18T13:33:35.322469Z
-Identifier: NTlCzADK | Created: 2025-07-18T12:15:22.123456Z
+{
+    "identifier": "OVmCpFNH",
+    "created": "2025-07-18T15:49:43.415564Z",
+    "expires": "2025-08-18T15:49:43.415564Z"
+}
+{
+    "identifier": "OmmbzCDC",
+    "created": "2025-07-18T13:33:35.322469Z",
+    "expires": "2025-08-18T13:33:35.322469Z"
+}
+{
+    "identifier": "NTlCzADK",
+    "created": "2025-07-18T12:15:22.123456Z",
+    "expires": "2025-08-18T12:15:22.123456Z"
+}
 ...
 
 Are you sure you want to delete this batch of comparisons? (Y/N): y
@@ -108,6 +150,32 @@ When the rate limit is reached, you'll see messages like:
 ```
 Rate limit reached. Waiting 12.34 seconds...
 Deleted comparison ABC123
+```
+
+### Example: List-Only Mode
+When using `--list-only`, the script will show comparisons and ask if you want to continue listing:
+```
+Rate limit set to 400 requests per minute
+
+Fetching batch 1...
+Count: 84868
+Found 10 comparisons in this batch.
+Comparisons:
+{
+    "identifier": "OVmCpFNH",
+    "created": "2025-07-18T15:49:43.415564Z",
+    "expires": "2025-08-18T15:49:43.415564Z"
+}
+{
+    "identifier": "OmmbzCDC",
+    "created": "2025-07-18T13:33:35.322469Z",
+    "expires": "2025-08-18T13:33:35.322469Z"
+}
+...
+Listed 10 comparisons in this batch.
+
+List next batch? (Y/N): y
+Listing next batch.
 ```
 
 ## Notes

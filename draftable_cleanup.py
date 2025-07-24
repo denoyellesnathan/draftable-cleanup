@@ -1,3 +1,4 @@
+import json
 import requests
 import argparse
 import time
@@ -163,7 +164,13 @@ def main():
         for comp in comparisons:
             identifier = comp.get("identifier", "N/A")
             created = comp.get("creation_time", "N/A")
-            print(f"Identifier: {identifier} | Created: {created}")
+            expires = comp.get("expiry_time", "N/A")
+            dto = {
+                "identifier": identifier,
+                "created": created,
+                "expires": expires,
+            }
+            print(json.dumps(dto, indent=4))
             total_listed += 1
 
         if list_only:
@@ -171,13 +178,7 @@ def main():
             batch_num += 1
             offset += batch_size
             url = f"{API_URL}?limit={batch_size}&offset={offset}"
-            confirm = (
-                input(
-                    "\nList next batch? (Y/N): "
-                )
-                .strip()
-                .lower()
-            )
+            confirm = input("\nList next batch? (Y/N): ").strip().lower()
             if confirm != "y":
                 print("Exiting.")
                 break
